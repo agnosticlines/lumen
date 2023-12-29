@@ -26,6 +26,7 @@ struct ConfigCache {
     public_url: String,
     registration_type: models::RegistrationType,
     pre_shared_secret: Option<String>,
+    hide_stats: bool,
 }
 
 struct AppData {
@@ -62,6 +63,7 @@ async fn main() -> Result<()> {
                 _ => models::RegistrationType::Open,
             },
             pre_shared_secret: std::env::var("PRE_SHARED_SECRET").ok(),
+            hide_stats: std::env::var("HIDE_STATS").unwrap_or_else(|_| String::from("false")).parse().unwrap_or(false),
         };
 
         if let models::RegistrationType::PreSharedSecret = config.registration_type {
