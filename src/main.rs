@@ -24,6 +24,8 @@ use crate::routes::{file::file_routes, gen::gen_routes, user::user_routes};
 
 struct ConfigCache {
     public_url: String,
+    registration_type: models::RegistrationType,
+    pre_shared_secret: Option<String>,
 }
 
 struct AppData {
@@ -52,9 +54,20 @@ async fn main() -> Result<()> {
         )
         .await?;
 
-    let config = ConfigCache {
-        public_url: std::env::var("PUBLIC_URL").expect("PUBLIC_URL not set in environment"),
-    };
+        let config = ConfigCache {
+            public_url: std::env::var("PUBLIC_URL").expect("PUBLIC_URL not set in environment"),
+            registration_type: match std::env::var("REGISTRATION_TYPE").unwrap_or_else(|_| String::from("Open")).as_str() {
+                "PreSharedSecret" => models::RegistrationType::PreSharedSecret,
+                _ => models::RegistrationType::Open,
+            },
+            pre_shared_secret: std::env::var("PRE_SHARED_SECRET").ok(),
+        };
+
+        if let models::RegistrationType::PreSharedSecret = config.registration_type {
+            if config.pre_shared_secret.is_none() {
+                panic!("Server configuration error: Pre-shared secret registration is enabled, but no pre-shared secret is set");
+            }
+        }
 
     info!("Running migrations...");
 

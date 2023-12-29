@@ -8,7 +8,7 @@ use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use log::error;
 use serde::{Deserialize, Serialize};
 
-use crate::{models::User, utils::generate_uuid, AppData};
+use crate::{models::User, models::RegistrationType, utils::generate_uuid, AppData};
 
 pub fn user_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_user).service(register);
@@ -63,6 +63,7 @@ async fn get_user(id: web::Path<i64>, data: Data<AppData>) -> impl Responder {
 struct RegisterRequest {
     username: String,
     password: String,
+    pre_shared_secret: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -78,6 +79,15 @@ struct RegisterResponse {
 
 #[post("/register")]
 async fn register(info: web::Json<RegisterRequest>, data: Data<AppData>) -> impl Responder {
+    match &data.config.registration_type {
+        RegistrationType::Open => {},
+        RegistrationType::PreSharedSecret => {
+            if info.pre_shared_secret != data.config.pre_shared_secret {
+                return HttpResponse::Forbidden().body("Invalid pre-shared secret");
+            }
+        },
+    }
+
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
     let password_hash = match argon2.hash_password(info.password.as_bytes(), &salt) {

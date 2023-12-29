@@ -3,6 +3,12 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 #[derive(Serialize, Deserialize)]
+pub enum RegistrationType {
+    Open,
+    PreSharedSecret,
+}
+
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SXConfig {
     version: String,
