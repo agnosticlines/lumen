@@ -58,6 +58,7 @@ async fn main() -> Result<()> {
             public_url: std::env::var("PUBLIC_URL").expect("PUBLIC_URL not set in environment"),
             registration_type: match std::env::var("REGISTRATION_TYPE").unwrap_or_else(|_| String::from("Open")).as_str() {
                 "PreSharedSecret" => models::RegistrationType::PreSharedSecret,
+                "Closed" => models::RegistrationType::Closed,
                 _ => models::RegistrationType::Open,
             },
             pre_shared_secret: std::env::var("PRE_SHARED_SECRET").ok(),

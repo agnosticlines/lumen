@@ -6,6 +6,7 @@ use sqlx::FromRow;
 pub enum RegistrationType {
     Open,
     PreSharedSecret,
+    Closed,
 }
 
 #[derive(Serialize, Deserialize)]

@@ -86,6 +86,9 @@ async fn register(info: web::Json<RegisterRequest>, data: Data<AppData>) -> impl
                 return HttpResponse::Forbidden().body("Invalid pre-shared secret");
             }
         },
+        RegistrationType::Closed => {
+            return HttpResponse::Forbidden().body("Registration is closed");
+        },
     }
 
     let salt = SaltString::generate(&mut OsRng);
